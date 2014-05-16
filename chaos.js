@@ -7,26 +7,11 @@
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
 
-// globals
-var audio_context, audio_analyser, source, playable;
-
 function Chaos() {
 	log("new chaos created");
 }
 
 Chaos.prototype.div = document.getElementById("chaos-pad");
-
-// Chaos.prototype.play = function ( freq ) {
-// 	/* Tiene que haberse inicializado oscilator antes */
-// 	source = audio_context.createOscillator();
-// 	source.frequency.value = freq;
-// 	source.connect(audio_context.destination);
-// 	source.noteOn(0);
-// }
-
-// Chaos.prototype.stop = function () {
-// 	source = source.noteOff(0);
-// }
 
 var chaos = new Chaos();
 var visualizer = new VisualizerSample();

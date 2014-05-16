@@ -1,16 +1,38 @@
+* {
+	-webkit-user-select: none; /* Chrome/Safari */        
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+ */
+
+	/* Rules below not implemented in browsers yet */
+	-o-user-select: none;
+	user-select: none;
+}
+
 #chaos-pad {
 
 	width: 500px;
 	height: 500px;
-	background-color: blue;
+	background-color: #6633FF;
 	float: left;
+	border: 10px solid #2E00B8;
 }
 
 canvas {
+	margin-top: 108px;
 	width: 500px;
-	height: 500px;
-	border: black solid 1px;
-	margin-left: 50px;
+	height: 285px;
+}
+
+.row-center {
+	display: flex;
+	justify-content: center;
+}
+
+.column-center {
+	height: 85%;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
 }
 
 #log {
