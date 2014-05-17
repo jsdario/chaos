@@ -6,40 +6,39 @@
 * for plotting: 
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
+var context;
 
 function Chaos() {
-	log("new chaos created");
+	try {
+		context = new (window.AudioContext || window.webkitAudioContext);
+	} catch (e) {
+		alert('No web audio source support in this browser');
+	}
 }
 
 Chaos.prototype.div = document.getElementById("chaos-pad");
 
-var chaos = new Chaos();
-var visualizer = new VisualizerSample();
-
-chaos.div.onmousedown = function( event ) {
+Chaos.prototype.calculateFrequency = function( event ) {
 	// 1. frecuencia + baja (55) es el fondo del pad
 	// 	  hay que ajustar las coordenadas.
-	y = this.offsetTop + 500; // coordenada del bottom
+	y = this.div.offsetTop + 500; // coordenada del bottom
 	y -= event.pageY;		   	   // diferencia de coords.
 	// 2. frequencia relativa al centro del pad
-	f = 55 + y*1.5;			//1.5 factor provisional
-	visualizer.togglePlayback(f);
+	var f = 55 + y*1.5;			//1.5 factor provisional
+	return f;
+};
+
+var chaos = new Chaos();
+var visualizer = new Visualizer( context );
+
+chaos.div.onmousedown = function( event ) {
+	visualizer.togglePlayback(chaos.calculateFrequency( event ));
 }
 
-chaos.div.onmousemove = function( event  ) {
-	if (event.which == 1) {
-		// 1. frecuencia + baja (55) es el fondo del pad
-		// 	  hay que ajustar las coordenadas.
-		y = this.offsetTop + 500; // coordenada del bottom
-		y -= event.pageY;		   	   // diferencia de coords.
-		// 2. frequencia relativa al centro del pad
-		f = 55 + y*1.5;			//1.5 factor provisional
-		visualizer.pitch(f);
-	}
-	
+chaos.div.onmousemove = function( event ) {
+	visualizer.pitch(chaos.calculateFrequency( event ));
 }
 
 chaos.div.onmouseup = function() {
 	visualizer.togglePlayback(440);
 }
-
