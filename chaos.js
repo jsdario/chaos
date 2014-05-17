@@ -10,7 +10,7 @@
 var PLAYING;
 var context;
 var oscillator;
-var delay, volume, feedback, context;
+var delay, volume, feedback, context, filter;
 
 /* para el boton */
 /* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
@@ -20,6 +20,27 @@ var waveforms = ["sine", "square", "sawtooth", "triangle"];
 function Chaos() {
 	try {
 		context = new (window.AudioContext || window.webkitAudioContext);
+
+		/* Nodes creation and routing */
+		/* Node creation los operadores terciarios son para compatibilidad */
+		delay 	   = context.createDelay ? context.createDelay() : context.createDelayNode();
+		volume	   = context.createGain  ? context.createGain()  :  context.createGainNode();
+		feedback   = context.createGain  ? context.createGain()  :  context.createGainNode();
+		filter 	   = context.createBiquadFilter();
+		compressor = context.createDynamicsCompressor();
+
+		/* Node conection */
+		// filter.type = 'lowpass';
+		filter.connect( compressor );
+		filter.connect( delay );
+		delay.connect( feedback );
+		feedback.connect( delay );	
+		delay.connect( compressor );
+		compressor.connect( volume );
+		volume.connect( context.destination );
+		
+		//volume.connect( visualizer.analyser );
+
 	} catch (e) {
 		alert('No web audio source support in this browser');
 	}
@@ -55,49 +76,38 @@ Chaos.prototype.shutDown = function( wave ) {
 		//window.setInterval(function(){ 
 			wave.frequency.value = f;
 		//}, 10);
-	}
-	window.setInterval(	function(){
-		wave.noteOff ? wave.noteOff(0) : wave.stop(0);
-	} , 300 );
+}
+window.setInterval(	function(){
+	wave.noteOff ? wave.noteOff(0) : wave.stop(0);
+} , 300 );
 };
 
 var chaos = new Chaos();
 var visualizer = new Visualizer( context );
 
+
 chaos.div.onmousedown = function( event ) {
 
-	/* Node creation los operadores terciarios son para compatibilidad */
-	oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode ();
-	delay 	   = context.createDelay ? context.createDelay() : context.createDelayNode();
-	volume	   = context.createGain  ? context.createGain()  :  context.createGainNode();
-	feedback   = context.createGain  ? context.createGain()  :  context.createGainNode();
-	compressor = context.createDynamicsCompressor();
-	
-	/* Node conection */
-	oscillator.connect( compressor );
-	oscillator.connect( delay );
-	delay.connect( feedback );
-	feedback.connect( delay );	
-	delay.connect( compressor );
-	compressor.connect( volume );
-	volume.connect( context.destination );
-	volume.connect( visualizer.analyser );
-
 	/* Calculate parameters */
-	oscillator.frequency.value = chaos.calculateFrequency( event );
-	delay.delayTime.value = 0.5;
+	oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode ();
+	oscillator.connect( filter );
+	var freq =  chaos.calculateFrequency( event );
+	oscillator.frequency.value = freq;
+    // filter.frequency.value = 2*freq;
 	volume.gain.value = 0.63;
 	feedback.gain.value = chaos.calculateGain( event );
 	/* Begin the magic */
 	oscillator.type = waveforms[iterator];
 	oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
-	visualizer.animate();
+	//visualizer.animate();
 	PLAYING = true;
 }
 
 chaos.div.onmousemove = function( event ) {
 	if( PLAYING ) {
-		oscillator.frequency.value = chaos.calculateFrequency( event );
+		var freq =  chaos.calculateFrequency( event );
+		oscillator.frequency.value = freq;
+		// filter.frequency.value = 2*freq;
 		feedback.gain.value = chaos.calculateGain( event );
 	}
 }
@@ -105,7 +115,7 @@ chaos.div.onmousemove = function( event ) {
 /* Que pare (parar sonido) siempre al quitar un click */
 document.onmouseup = function() {
 	chaos.shutDown(oscillator);
-	visualizer.clear( );
+	//visualizer.clear( );
 	PLAYING = false;
 }
 
@@ -116,3 +126,18 @@ waveform_btn.onclick = function(){
 };
 
 
+var start = 0;
+var taptap_btn = document.getElementById('tap-tap');
+taptap_btn.onmousedown = function( ) {
+    if( start == 0 ) {
+    	log(start);
+        start = new Date().getTime();
+    } else {
+        var elapsed = new Date().getTime() - start;
+        delay.delayTime.value = elapsed * 0.001;
+        log("Delay: " + elapsed);
+        // start again
+        start = 0;
+        return (taptap_btn.innerHTML = elapsed + "ms");
+    }
+};
