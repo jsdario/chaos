@@ -12,13 +12,21 @@
 
 	width: 500px;
 	height: 500px;
-	background-color: #6633FF;
 	float: left;
 	border: 10px solid #2E00B8;
 }
 
+.mask {
+
+	width:500px;
+	height: 500px ;
+	background-color: #6633FF;
+	opacity: .6;
+}
+
 canvas {
-	margin-top: 108px;
+	position:absolute;
+	left:20px; top:108px;
 	width: 500px;
 	height: 285px;
 }

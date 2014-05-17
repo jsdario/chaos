@@ -10,7 +10,12 @@
 var PLAYING;
 var context;
 var oscillator;
-var delay, volume, feedback;
+var delay, volume, feedback, context;
+
+/* para el boton */
+/* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
+var iterator = 0;
+var waveforms = ["sine", "square", "sawtooth", "triangle"];
 
 function Chaos() {
 	try {
@@ -32,12 +37,12 @@ Chaos.prototype.calculateFrequency = function( event ) {
 	return f;
 };
 
-Chaos.prototype.calculateFeedback = function( event ) {
+Chaos.prototype.calculateGain = function( event ) {
 	// 1. Hay que ajustar las coordenadas.
 	x = event.pageX - this.div.offsetLeft;
 	// 2. ganancia relativa al centro del pad
 	// Min = 1; max = 2, ancho = 500px
-	var f = x/500;//valores mas o menos arbitrarios
+	var f = x/(500+x);//valores mas o menos arbitrarios
 	//si f es mayor que uno, es un sistema inestable!
 	return f;
 };
@@ -53,7 +58,7 @@ Chaos.prototype.shutDown = function( wave ) {
 	}
 	window.setInterval(	function(){
 		wave.noteOff ? wave.noteOff(0) : wave.stop(0);
-	} , 200 );
+	} , 300 );
 };
 
 var chaos = new Chaos();
@@ -66,16 +71,25 @@ chaos.div.onmousedown = function( event ) {
 	delay 	   = context.createDelay ? context.createDelay() : context.createDelayNode();
 	volume	   = context.createGain  ? context.createGain()  :  context.createGainNode();
 	feedback   = context.createGain  ? context.createGain()  :  context.createGainNode();
+	compressor = context.createDynamicsCompressor();
+	
 	/* Node conection */
-	oscillator.connect(delay);
-	delay.connect(feedback);
-	feedback.connect(delay);
-	visualizer.connectToAnalyser(delay);
+	oscillator.connect( compressor );
+	oscillator.connect( delay );
+	delay.connect( feedback );
+	feedback.connect( delay );	
+	delay.connect( compressor );
+	compressor.connect( volume );
+	volume.connect( context.destination );
+	volume.connect( visualizer.analyser );
+
 	/* Calculate parameters */
 	oscillator.frequency.value = chaos.calculateFrequency( event );
-	delay.delayTime.value = 0.2;
-	feedback.gain.value = chaos.calculateFeedback( event );
+	delay.delayTime.value = 0.5;
+	volume.gain.value = 0.63;
+	feedback.gain.value = chaos.calculateGain( event );
 	/* Begin the magic */
+	oscillator.type = waveforms[iterator];
 	oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
 	visualizer.animate();
 	PLAYING = true;
@@ -84,7 +98,7 @@ chaos.div.onmousedown = function( event ) {
 chaos.div.onmousemove = function( event ) {
 	if( PLAYING ) {
 		oscillator.frequency.value = chaos.calculateFrequency( event );
-		feedback.gain.value = chaos.calculateFeedback( event );
+		feedback.gain.value = chaos.calculateGain( event );
 	}
 }
 
@@ -94,3 +108,11 @@ document.onmouseup = function() {
 	visualizer.clear( );
 	PLAYING = false;
 }
+
+var waveform_btn = document.getElementById('waveform');
+waveform_btn.onclick = function(){
+	iterator = (iterator < 3) ? (iterator+1) : 0;
+	return (waveform_btn.innerHTML = waveforms[iterator]);
+};
+
+

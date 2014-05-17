@@ -41,7 +41,6 @@ function Visualizer( context ) {
 
   this.context = context;
   this.analyser =  this.context.createAnalyser();
-  this.analyser.connect( this.context.destination );
   this.analyser.minDecibels = -140;
   this.analyser.maxDecibels = 0;
   this.freqs = new Uint8Array(this.analyser.frequencyBinCount);
@@ -93,10 +92,6 @@ Visualizer.prototype.clear = function( time ) {
     drawContext.clearRect(0, 0, drawContext.canvas.width, drawContext.canvas.height);
   }, time? time : 100 );
   canvas.width = 0;
-}
-
-Visualizer.prototype.connectToAnalyser = function( node ) {
-   node.connect( this.analyser );
 }
 
 Visualizer.prototype.getFrequencyValue = function(freq) {
