@@ -37,21 +37,23 @@ Chaos.prototype.calculateFeedback = function( event ) {
 	x = event.pageX - this.div.offsetLeft;
 	// 2. ganancia relativa al centro del pad
 	// Min = 1; max = 2, ancho = 500px
-	var f = 1 + x/500;
+	var f = x/500;//valores mas o menos arbitrarios
+	//si f es mayor que uno, es un sistema inestable!
 	return f;
 };
 
 Chaos.prototype.shutDown = function( wave ) {
 // Funcion molona para apagar guay una onda
 // No funciona muy bien :(
-	/*var F = Math.floor(wave.frequency.value);
+	var F = Math.floor(wave.frequency.value);
 	for( f = F; f > 1; Math.floor( f = f - f/300 ) ) {
-		window.setInterval(function(){ 
+		//window.setInterval(function(){ 
 			wave.frequency.value = f;
-		}, 10);
-	}*/
-	wave.noteOff ? wave.noteOff(0) : wave.stop(0);
-	//window.setInterval(	XXX , 300 );
+		//}, 10);
+	}
+	window.setInterval(	function(){
+		wave.noteOff ? wave.noteOff(0) : wave.stop(0);
+	} , 200 );
 };
 
 var chaos = new Chaos();
@@ -67,10 +69,11 @@ chaos.div.onmousedown = function( event ) {
 	/* Node conection */
 	oscillator.connect(delay);
 	delay.connect(feedback);
-	visualizer.connect(feedback);
+	feedback.connect(delay);
+	visualizer.connectToAnalyser(delay);
 	/* Calculate parameters */
 	oscillator.frequency.value = chaos.calculateFrequency( event );
-	//delay.delayTime.value = 0.3;
+	delay.delayTime.value = 0.2;
 	feedback.gain.value = chaos.calculateFeedback( event );
 	/* Begin the magic */
 	oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);

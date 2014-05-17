@@ -95,8 +95,8 @@ Visualizer.prototype.clear = function( time ) {
   canvas.width = 0;
 }
 
-Visualizer.prototype.connect = function( node ) {
-   node.connect(this.analyser);
+Visualizer.prototype.connectToAnalyser = function( node ) {
+   node.connect( this.analyser );
 }
 
 Visualizer.prototype.getFrequencyValue = function(freq) {
