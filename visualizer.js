@@ -27,18 +27,14 @@
 })();
 
 
-
-  // width: 500px;
-  // height: 285px;
-  var WIDTH = 500;
-  var HEIGHT = 285;
-
 // Interesting parameters to tweak!
 var SMOOTHING = 0.8;
 var FFT_SIZE = 2048;
 
 /* Get canvas */
 var canvas = document.querySelector('canvas');
+var WIDTH = canvas.offsetWidth;
+var HEIGHT = canvas.offsetHeight;
 var drawContext = canvas.getContext('2d');
 
 function Visualizer( context ) {
@@ -56,27 +52,6 @@ function Visualizer( context ) {
   this.startOffset = 0;
 
   log("visualizer created");
-}
-
-// Toggle playback
-Visualizer.prototype.togglePlayback = function( wave ) {
-  
-  if (this.isPlaying) {
-    // Stop playback
-    this.source.noteOff(0);
-    this.clear();
-    log("stopped");
-    // Save the position of the play head.
-  } else {
-    // Connect graph
-    this.source =  wave ;
-    this.source.connect(this.analyser);
-    this.source.noteOn(0);
-    // Start visualizer.
-    window.requestAnimFrame(this.draw.bind(this));
-  }
-  
-  this.isPlaying = !this.isPlaying;
 }
 
 Visualizer.prototype.draw = function() {
@@ -114,11 +89,22 @@ Visualizer.prototype.draw = function() {
   }
 }
 
+Visualizer.prototype.animate = function() {
+  this.isPlaying = true;
+  window.requestAnimFrame(this.draw.bind(this));
+}
+
 Visualizer.prototype.clear = function() {
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT;
-  drawContext.clearRect(0, 0, HEIGHT, WIDTH);
-  log("clearing");
+  this.isPlaying = false;
+  window.setInterval(function() {
+    //Set some time so the canvas finishes painting
+    drawContext.clearRect(0, 0, drawContext.canvas.width, drawContext.canvas.height);
+  }, 100);
+  canvas.width = 0;
+}
+
+Visualizer.prototype.connect = function( node ) {
+   node.connect(this.analyser);
 }
 
 Visualizer.prototype.getFrequencyValue = function(freq) {

@@ -8,6 +8,7 @@
 */
 var context;
 var oscillator;
+var delay;
 
 function Chaos() {
 	try {
@@ -35,14 +36,21 @@ var visualizer = new Visualizer( context );
 chaos.div.onmousedown = function( event ) {
 
 	oscillator = context.createOscillator();
+	//delay 	   = context.createDelayNode();
 	oscillator.frequency.value = chaos.calculateFrequency( event );
-	visualizer.togglePlayback( oscillator );
+	//oscillator.connect(delay);
+	//metodo propio
+	visualizer.connect(oscillator);
+	oscillator.noteOn(0);
+	visualizer.animate();
 }
 
 chaos.div.onmousemove = function( event ) {
 	oscillator.frequency.value = chaos.calculateFrequency( event );
 }
 
-chaos.div.onmouseup = function() {
-	visualizer.togglePlayback( oscillator );
+/* Que pare (parar sonido) siempre al quitar un click */
+document.onmouseup = function() {
+	oscillator.noteOff(0);
+  	visualizer.clear();
 }
