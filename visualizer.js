@@ -94,12 +94,12 @@ Visualizer.prototype.animate = function() {
   window.requestAnimFrame(this.draw.bind(this));
 }
 
-Visualizer.prototype.clear = function() {
+Visualizer.prototype.clear = function( time ) {
   this.isPlaying = false;
   window.setInterval(function() {
     //Set some time so the canvas finishes painting
     drawContext.clearRect(0, 0, drawContext.canvas.width, drawContext.canvas.height);
-  }, 100);
+  }, time? time : 100 );
   canvas.width = 0;
 }
 
