@@ -6,9 +6,11 @@
 * for plotting: 
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
+
+var PLAYING;
 var context;
 var oscillator;
-var delay, feedback;
+var delay, volume, feedback;
 
 function Chaos() {
 	try {
@@ -39,47 +41,53 @@ Chaos.prototype.calculateFeedback = function( event ) {
 	return f;
 };
 
-/* Funcion molona para apagar guay una onda */
-/* No funciona muy bien :( */
 Chaos.prototype.shutDown = function( wave ) {
-	var F = Math.floor(wave.frequency.value);
+// Funcion molona para apagar guay una onda
+// No funciona muy bien :(
+	/*var F = Math.floor(wave.frequency.value);
 	for( f = F; f > 1; Math.floor( f = f - f/300 ) ) {
 		window.setInterval(function(){ 
 			wave.frequency.value = f;
 		}, 10);
-	}
-	window.setInterval(	wave.noteOff(0) , 300 );
-}
+	}*/
+	wave.noteOff ? wave.noteOff(0) : wave.stop(0);
+	//window.setInterval(	XXX , 300 );
+};
 
 var chaos = new Chaos();
 var visualizer = new Visualizer( context );
 
 chaos.div.onmousedown = function( event ) {
 
-	/* Node creation */
-	oscillator = context.createOscillator();
-	delay 	   = context.createDelayNode();
-	feedback   = context.createGainNode();
+	/* Node creation los operadores terciarios son para compatibilidad */
+	oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode ();
+	delay 	   = context.createDelay ? context.createDelay() : context.createDelayNode();
+	volume	   = context.createGain  ? context.createGain()  :  context.createGainNode();
+	feedback   = context.createGain  ? context.createGain()  :  context.createGainNode();
 	/* Node conection */
 	oscillator.connect(delay);
 	delay.connect(feedback);
 	visualizer.connect(feedback);
 	/* Calculate parameters */
 	oscillator.frequency.value = chaos.calculateFrequency( event );
-	delay.delayTime.value = 0.3;
+	//delay.delayTime.value = 0.3;
 	feedback.gain.value = chaos.calculateFeedback( event );
 	/* Begin the magic */
-	oscillator.noteOn(0);
+	oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
 	visualizer.animate();
+	PLAYING = true;
 }
 
 chaos.div.onmousemove = function( event ) {
-	oscillator.frequency.value = chaos.calculateFrequency( event );
-	feedback.gain.value = chaos.calculateFeedback( event );
+	if( PLAYING ) {
+		oscillator.frequency.value = chaos.calculateFrequency( event );
+		feedback.gain.value = chaos.calculateFeedback( event );
+	}
 }
 
 /* Que pare (parar sonido) siempre al quitar un click */
 document.onmouseup = function() {
 	chaos.shutDown(oscillator);
 	visualizer.clear( );
+	PLAYING = false;
 }

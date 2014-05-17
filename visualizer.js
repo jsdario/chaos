@@ -41,13 +41,13 @@ function Visualizer( context ) {
 
   this.context = context;
   this.analyser =  this.context.createAnalyser();
-  this.analyser.connect( this.context.destination);
+  this.analyser.connect( this.context.destination );
   this.analyser.minDecibels = -140;
   this.analyser.maxDecibels = 0;
   this.freqs = new Uint8Array(this.analyser.frequencyBinCount);
   this.times = new Uint8Array(FFT_SIZE);
 
-  this.isPlaying = false;
+  this.PLAYING = false;
   this.startTime = 0;
   this.startOffset = 0;
 
@@ -74,28 +74,20 @@ Visualizer.prototype.draw = function() {
     var height = HEIGHT * percent;
     var offset = HEIGHT - height - 1;
     drawContext.fillRect(i * barWidth, offset, 1, 4);
-    // Linear interpolation
-    if ( this.times[i+1] != null ){
-      value =  (value + this.times[i+1])/2;
-      percent = value / 256;
-      height = HEIGHT * percent;
-      offset = HEIGHT - height - 1;
-      drawContext.fillRect( (i+0.5) * barWidth, offset, 1, 2);
-    }
   } 
 
-  if (this.isPlaying) {
+  if (this.PLAYING) {
     requestAnimFrame(this.draw.bind(this));
   }
 }
 
 Visualizer.prototype.animate = function() {
-  this.isPlaying = true;
+  this.PLAYING = true;
   window.requestAnimFrame(this.draw.bind(this));
 }
 
 Visualizer.prototype.clear = function( time ) {
-  this.isPlaying = false;
+  this.PLAYING = false;
   window.setInterval(function() {
     //Set some time so the canvas finishes painting
     drawContext.clearRect(0, 0, drawContext.canvas.width, drawContext.canvas.height);
