@@ -26,19 +26,20 @@
   };
 })();
 
-/* Get canvas */
-var canvas = document.querySelector('canvas');
-var drawContext = canvas.getContext('2d');
 
 
   // width: 500px;
   // height: 285px;
-var WIDTH = 500;
-var HEIGHT = 285;
+  var WIDTH = 500;
+  var HEIGHT = 285;
 
 // Interesting parameters to tweak!
 var SMOOTHING = 0.8;
 var FFT_SIZE = 2048;
+
+/* Get canvas */
+var canvas = document.querySelector('canvas');
+var drawContext = canvas.getContext('2d');
 
 function Visualizer( context ) {
 
@@ -53,11 +54,13 @@ function Visualizer( context ) {
   this.isPlaying = false;
   this.startTime = 0;
   this.startOffset = 0;
+
   log("visualizer created");
 }
 
 // Toggle playback
-Visualizer.prototype.togglePlayback = function( freq ) {
+Visualizer.prototype.togglePlayback = function( wave ) {
+  
   if (this.isPlaying) {
     // Stop playback
     this.source.noteOff(0);
@@ -65,33 +68,29 @@ Visualizer.prototype.togglePlayback = function( freq ) {
     log("stopped");
     // Save the position of the play head.
   } else {
-    this.source =  this.context.createOscillator();
-    this.source.frequency.value = freq;
     // Connect graph
+    this.source =  wave ;
     this.source.connect(this.analyser);
     this.source.noteOn(0);
     // Start visualizer.
     window.requestAnimFrame(this.draw.bind(this));
   }
+  
   this.isPlaying = !this.isPlaying;
 }
 
-Visualizer.prototype.pitch = function( freq ) {
-  this.source.frequency.value = freq;
-}
-
 Visualizer.prototype.draw = function() {
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  drawContext.fillStyle = "white";
   this.analyser.smoothingTimeConstant = SMOOTHING;
   this.analyser.fftSize = FFT_SIZE;
 
-  // Get the frequency data from the currently playing music
+  // Get the time data from the currently playing music
   this.analyser.getByteTimeDomainData(this.times);
 
   var width = Math.floor(1/this.freqs.length, 10);
   var barWidth = WIDTH/FFT_SIZE;
-  drawContext.fillStyle = 'white';
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT;
 
   // Draw the time domain chart.
   for (var i = 0; i < FFT_SIZE; i++) {
@@ -110,14 +109,16 @@ Visualizer.prototype.draw = function() {
     }
   } 
 
-  Visualizer.prototype.clear = function() {
-    drawContext.clearRect(0, 0, 500, 500);
-    log("clearing");
-  }
-
   if (this.isPlaying) {
     requestAnimFrame(this.draw.bind(this));
   }
+}
+
+Visualizer.prototype.clear = function() {
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  drawContext.clearRect(0, 0, HEIGHT, WIDTH);
+  log("clearing");
 }
 
 Visualizer.prototype.getFrequencyValue = function(freq) {

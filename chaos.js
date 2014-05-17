@@ -7,6 +7,7 @@
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
 var context;
+var oscillator;
 
 function Chaos() {
 	try {
@@ -32,13 +33,16 @@ var chaos = new Chaos();
 var visualizer = new Visualizer( context );
 
 chaos.div.onmousedown = function( event ) {
-	visualizer.togglePlayback(chaos.calculateFrequency( event ));
+
+	oscillator = context.createOscillator();
+	oscillator.frequency.value = chaos.calculateFrequency( event );
+	visualizer.togglePlayback( oscillator );
 }
 
 chaos.div.onmousemove = function( event ) {
-	visualizer.pitch(chaos.calculateFrequency( event ));
+	oscillator.frequency.value = chaos.calculateFrequency( event );
 }
 
 chaos.div.onmouseup = function() {
-	visualizer.togglePlayback(440);
+	visualizer.togglePlayback( oscillator );
 }
