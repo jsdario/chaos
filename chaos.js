@@ -21,7 +21,7 @@ var waveforms = ["sine", "square", "sawtooth", "triangle"];
 /* Super efficcient */
 var FEEDBACK_BUFFER = new Array(500);
 for( n = 0; n < 500; n ++ ) {
-	FEEDBACK_BUFFER[n] = Math.pow(n/(500+0.1*n),2)*Math.exp( Math.pow(n/500,2) - 1 );
+	FEEDBACK_BUFFER[n] = n/(500+0.1*n)*Math.exp( Math.pow(n/500,2) - 1 );
 }
 
 function Chaos() {
@@ -107,6 +107,7 @@ Chaos.prototype.shutdown = function( ) {
 
 var chaos = new Chaos();
 var visualizer = new Visualizer( context );
+visualizer.animate();
 
 chaos.div.onmousedown = function( event ) {
 
@@ -118,7 +119,6 @@ chaos.div.onmousedown = function( event ) {
 	feedback.gain.value = chaos.calculateGain( event );
 	oscillator.type = waveforms[iterator];
 	oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
-	visualizer.animate();
 	PLAYING = true;
 }
 
@@ -134,7 +134,6 @@ chaos.div.onmousemove = function( event ) {
 document.onmouseup = function() {
 	//chaos.shutDown();
 	oscillator.noteOff ? oscillator.noteOff(0) : oscillator.stop(0);
-	visualizer.clear( );
 	PLAYING = false;
 }
 
