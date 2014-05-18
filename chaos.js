@@ -11,6 +11,7 @@ var PLAYING;
 var context;
 var oscillator;
 var delay, volume, feedback, context, filter;
+var visualizer;
 
 /* para el boton */
 /* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
@@ -37,8 +38,21 @@ function Chaos() {
 		compressor = context.createDynamicsCompressor();
 		volume.gain.value = 1;
 
-	} catch (e) {
-		alert('No web audio source support in this browser' + e);
+		visualizer = new Visualizer( context );
+
+		/* Routing nodes only  ONCE but oscillator each time*/
+		//filter.type = 'lowpass';
+		//filter.connect( compressor );
+		//filter.connect( delay );
+		delay.connect( compressor );
+		delay.connect( feedback );
+		feedback.connect( delay );	
+		compressor.connect( volume );
+		volume.connect( visualizer.analyser );
+		volume.connect( context.destination );
+
+	} catch (exception) {
+		alert('No web audio source support in this browser' + exception);
 	}
 }
 
@@ -71,49 +85,15 @@ Chaos.prototype.calculateGain = function( event ) {
 	return g;
 };
 
-Chaos.prototype.route = function() {
-	try {
-		/* Node conection */
-		oscillator.connect( compressor );
-		oscillator.connect( delay );
-		//filter.type = 'lowpass';
-		//filter.connect( compressor );
-		//filter.connect( delay );
-		delay.connect( compressor );
-		delay.connect( feedback );
-		feedback.connect( delay );	
-		compressor.connect( volume );
-		volume.connect( visualizer.analyser );
-		volume.connect( context.destination );
-
-	} catch ( exception ){
-		alert("Unable to set up. " + exception);
-	}
-};
-
-Chaos.prototype.shutdown = function( ) {
-// Funcion molona para apagar guay una onda
-// No funciona muy bien :(
-	try {
-		var F = Math.floor(oscillator.frequency.value);
-		for( f = F; f > 1; Math.floor( f = f - f/300 ) ) {
-			oscillator.frequency.value = f;
-		}
-		oscillator.noteOff ? oscillator.noteOff(0) : oscillator.stop(0);
-	} catch ( exception ) {
-		alert(" Syntax error. " + exception )
-	}
-};
-
 var chaos = new Chaos();
-var visualizer = new Visualizer( context );
 visualizer.animate();
 
 chaos.div.onmousedown = function( event ) {
 
 	/* Calculate parameters */
 	oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode ();
-	chaos.route();
+	oscillator.connect( compressor );
+	oscillator.connect( delay );
 	var freq =  chaos.calculateFrequency( event );
 	oscillator.frequency.value = freq;
 	feedback.gain.value = chaos.calculateGain( event );
@@ -132,7 +112,6 @@ chaos.div.onmousemove = function( event ) {
 
 /* Que pare (parar sonido) siempre al quitar un click */
 document.onmouseup = function() {
-	//chaos.shutDown();
 	oscillator.noteOff ? oscillator.noteOff(0) : oscillator.stop(0);
 	PLAYING = false;
 }
@@ -148,12 +127,10 @@ var start = 0;
 var taptap_btn = document.getElementById('tap-tap');
 taptap_btn.onmousedown = function( ) {
 	if( start == 0 ) {
-		log(start);
 		start = new Date().getTime();
 	} else {
 		var elapsed = new Date().getTime() - start;
 		delay.delayTime.value = elapsed * 0.001;
-		log("Delay: " + elapsed);
         // start again
         start = 0;
         return (taptap_btn.innerHTML = elapsed + "ms");

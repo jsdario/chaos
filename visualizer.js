@@ -49,8 +49,6 @@ function Visualizer( context ) {
   this.PLAYING = false;
   this.startTime = 0;
   this.startOffset = 0;
-
-  log("visualizer created");
 }
 
 Visualizer.prototype.draw = function() {
