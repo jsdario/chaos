@@ -17,6 +17,13 @@ var delay, volume, feedback, context, filter;
 var iterator = 0;
 var waveforms = ["sine", "square", "sawtooth", "triangle"];
 
+/* Buffer de la funcion de transferencias del feedback */
+/* Super efficcient */
+var FEEDBACK_BUFFER = new Array(500);
+for( n = 0; n < 500; n ++ ) {
+	FEEDBACK_BUFFER[n] = Math.pow(n/(500+0.1*n),2)*Math.exp( Math.pow(n/500,2) - 1 );
+}
+
 function Chaos() {
 	try {
 		context = new (window.AudioContext || window.webkitAudioContext);
@@ -48,29 +55,30 @@ Chaos.prototype.calculateFrequency = function( event ) {
 };
 
 Chaos.prototype.calculateGain = function( event ) {
-	// 1. Hay que ajustar las coordenadas.
-	x = event.pageX - this.div.offsetLeft;
+
+	x = event.pageX - this.div.offsetLeft; // coord
 	// 2. ganancia relativa al centro del pad
-	// sigue una exponencial cuadratica creciente con un factor aqui mi calculo
+	// Min = 0; max ~= 0.9
+	// sigue una exponencial cuadratica creciente
+	// con un umbral de disparo y un factor atenuante
 	// http://www.wolframalpha.com/input/?i=%28x%2F500%29*e^%28+%28x%2F500%29^2+-+1+%29+
-	// Min = 1; max = 2, ancho = 500px
 	if ( x < 50 ) {
-		f = 0;
-	} else {
-		f = Math.pow(x/(500+0.1*x),2)*Math.exp( Math.pow(x/500,2) - 1 );
+		g = 0;
+	} else if ( x < 500 ) {
+		g = FEEDBACK_BUFFER[x];
 	}
-	log( "exp: " + f );
-	//si f es mayor que uno, es un sistema inestable!
-	return f;
+	// If f > 1 => sistema inestable
+	return g;
 };
 
 Chaos.prototype.route = function() {
 	try {
 		/* Node conection */
-		oscillator.connect( filter );
+		oscillator.connect( compressor );
+		oscillator.connect( delay );
 		//filter.type = 'lowpass';
-		filter.connect( compressor );
-		filter.connect( delay );
+		//filter.connect( compressor );
+		//filter.connect( delay );
 		delay.connect( compressor );
 		delay.connect( feedback );
 		feedback.connect( delay );	
@@ -107,11 +115,11 @@ chaos.div.onmousedown = function( event ) {
 	chaos.route();
 	var freq =  chaos.calculateFrequency( event );
 	oscillator.frequency.value = freq;
-    feedback.gain.value = chaos.calculateGain( event );
-    oscillator.type = waveforms[iterator];
-    oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
-    visualizer.animate();
-    PLAYING = true;
+	feedback.gain.value = chaos.calculateGain( event );
+	oscillator.type = waveforms[iterator];
+	oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
+	visualizer.animate();
+	PLAYING = true;
 }
 
 chaos.div.onmousemove = function( event ) {
