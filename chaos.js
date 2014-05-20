@@ -15,8 +15,10 @@ var visualizer;
 
 /* para el boton */
 /* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
-var iterator = 0;
+var current_waveform = 0;
 var waveforms = ["sine", "square", "sawtooth", "triangle"];
+var current_filter = 0;
+var filters = ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"];
 
 /* Buffer de la funcion de transferencias del feedback */
 /* Super efficcient */
@@ -41,13 +43,11 @@ function Chaos() {
 		visualizer = new Visualizer( context );
 
 		/* Routing nodes only  ONCE but oscillator each time*/
-		//filter.type = 'lowpass';
-		//filter.connect( compressor );
-		//filter.connect( delay );
 		delay.connect( compressor );
 		delay.connect( feedback );
 		feedback.connect( delay );	
-		compressor.connect( volume );
+		compressor.connect( filter );
+		filter.connect( volume );
 		volume.connect( visualizer.analyser );
 		volume.connect( context.destination );
 
@@ -65,8 +65,13 @@ Chaos.prototype.calculateFrequency = function( event ) {
 	y -= event.pageY;		   	   // diferencia de coords.
 	// 2. frequencia relativa al centro del pad
 	var f = 22 + y*1.5;			//1.5 factor provisional
-	return f;
+	oscillator.frequency.value = f;
 };
+
+Chaos.prototype.setFilterFrequency = function ( event ) {
+	f = oscillator.frequency.value
+    filter.frequency.value = 5*f;
+}
 
 Chaos.prototype.calculateGain = function( event ) {
 
@@ -77,36 +82,39 @@ Chaos.prototype.calculateGain = function( event ) {
 	// con un umbral de disparo y un factor atenuante
 	// http://www.wolframalpha.com/input/?i=%28x%2F500%29*e^%28+%28x%2F500%29^2+-+1+%29+
 	if ( x < 50 ) {
-		g = 0;
+		feedback.gain.value = 0;
 	} else if ( x < 500 ) {
-		g = FEEDBACK_BUFFER[x];
+		feedback.gain.value = FEEDBACK_BUFFER[x];
 	}
 	// If f > 1 => sistema inestable
-	return g;
 };
 
 var chaos = new Chaos();
 visualizer.animate();
 
 chaos.div.onmousedown = function( event ) {
-
-	/* Calculate parameters */
-	oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode ();
-	oscillator.connect( compressor );
-	oscillator.connect( delay );
-	var freq =  chaos.calculateFrequency( event );
-	oscillator.frequency.value = freq;
-	feedback.gain.value = chaos.calculateGain( event );
-	oscillator.type = waveforms[iterator];
-	oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
-	PLAYING = true;
+	try{
+		/* Connect to the system */
+		oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode ();
+		oscillator.connect( compressor );
+		oscillator.connect( delay );
+		/* Calculate parameters */
+		chaos.calculateFrequency( event );
+		chaos.setFilterFrequency( event );
+		chaos.calculateGain( event );
+		oscillator.type = waveforms[current_waveform];
+		oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
+		PLAYING = true;
+	} catch( exception ){
+		alert(exception);
+	}
 }
 
 chaos.div.onmousemove = function( event ) {
 	if( PLAYING ) {
-		var freq =  chaos.calculateFrequency( event );
-		oscillator.frequency.value = freq;
-		feedback.gain.value = chaos.calculateGain( event );
+		chaos.calculateFrequency( event );
+		chaos.setFilterFrequency( event );
+		chaos.calculateGain( event );
 	}
 }
 
@@ -118,10 +126,16 @@ document.onmouseup = function() {
 
 var waveform_btn = document.getElementById('waveform');
 waveform_btn.onclick = function(){
-	iterator = (iterator < 3) ? (iterator+1) : 0;
-	return (waveform_btn.innerHTML = waveforms[iterator]);
+	current_waveform = (current_waveform < 3) ? (current_waveform+1) : 0;
+	return (waveform_btn.innerHTML = waveforms[current_waveform]);
 };
 
+var filter_btn = document.getElementById('filter');
+filter_btn.onclick = function(){
+	current_filter = (current_filter < 3) ? (current_filter+1) : 0;
+	filter.type = current_filter;
+	return (filter_btn.innerHTML = filters[current_filter]);
+};
 
 var start = 0;
 var taptap_btn = document.getElementById('tap-tap');

@@ -33,7 +33,7 @@ body, html {
 
 canvas {
 	position:absolute;
-	left:20px; top:108px;
+	top:108px;
 	width: 500px;
 	height: 285px;
 }
