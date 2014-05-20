@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
- // shim layer with setTimeout fallback
- window.requestAnimFrame = (function(){
-  return  window.requestAnimationFrame       || 
-  window.webkitRequestAnimationFrame || 
-  window.mozRequestAnimationFrame    || 
-  window.oRequestAnimationFrame      || 
-  window.msRequestAnimationFrame     || 
-  function( callback ){
-    window.setTimeout(callback, 1000 / 60);
-  };
+// shim layer with setTimeout fallback
+window.requestAnimFrame = (function(){
+    return  window.requestAnimationFrame       || 
+        window.webkitRequestAnimationFrame || 
+        window.mozRequestAnimationFrame    || 
+        window.oRequestAnimationFrame      || 
+        window.msRequestAnimationFrame     || 
+        function( callback ){
+        window.setTimeout(callback, 1000 / 60);
+    };
 })();
-
 
 // Interesting parameters to tweak!
 var SMOOTHING = 0.8;
@@ -33,67 +32,74 @@ var FFT_SIZE = 2048;
 
 /* Get canvas */
 var canvas = document.querySelector('canvas');
-var WIDTH = canvas.offsetWidth;
-var HEIGHT = canvas.offsetHeight;
-var drawContext = canvas.getContext('2d');
 
-function Visualizer( context ) {
 
-  this.context = context;
-  this.analyser =  this.context.createAnalyser();
-  this.analyser.minDecibels = -140;
-  this.analyser.maxDecibels = 0;
-  this.freqs = new Uint8Array(this.analyser.frequencyBinCount);
-  this.times = new Uint8Array(FFT_SIZE);
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    document.getElementById('chaos-pad').removeChild(canvas);
+} else {
 
-  this.PLAYING = false;
-  this.startTime = 0;
-  this.startOffset = 0;
-}
+    var WIDTH = canvas.offsetWidth;
+    var HEIGHT = canvas.offsetHeight;
+    var drawContext = canvas.getContext('2d');
 
-Visualizer.prototype.draw = function() {
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT;
-  drawContext.fillStyle = "white";
-  this.analyser.smoothingTimeConstant = SMOOTHING;
-  this.analyser.fftSize = FFT_SIZE;
+    function Visualizer( context ) {
 
-  // Get the time data from the currently playing music
-  this.analyser.getByteTimeDomainData(this.times);
+        this.context = context;
+        this.analyser =  this.context.createAnalyser();
+        this.analyser.minDecibels = -140;
+        this.analyser.maxDecibels = 0;
+        this.freqs = new Uint8Array(this.analyser.frequencyBinCount);
+        this.times = new Uint8Array(FFT_SIZE);
 
-  var width = Math.floor(1/this.freqs.length, 10);
-  var barWidth = WIDTH/FFT_SIZE;
+        this.PLAYING = false;
+        this.startTime = 0;
+        this.startOffset = 0;
+    }
 
-  // Draw the time domain chart.
-  for (var i = 0; i < FFT_SIZE; i++) {
-    var value = this.times[i];
-    var percent = value / 256;
-    var height = HEIGHT * percent;
-    var offset = HEIGHT - height - 1;
-    drawContext.fillRect(i * barWidth, offset, 1, 4);
-  } 
+    Visualizer.prototype.draw = function() {
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+        drawContext.fillStyle = "white";
+        this.analyser.smoothingTimeConstant = SMOOTHING;
+        this.analyser.fftSize = FFT_SIZE;
 
-  if (this.PLAYING) {
-    requestAnimFrame(this.draw.bind(this));
-  }
-}
+        // Get the time data from the currently playing music
+        this.analyser.getByteTimeDomainData(this.times);
 
-Visualizer.prototype.animate = function() {
-  this.PLAYING = true;
-  window.requestAnimFrame(this.draw.bind(this));
-}
+        var width = Math.floor(1/this.freqs.length, 10);
+        var barWidth = WIDTH/FFT_SIZE;
 
-Visualizer.prototype.clear = function( time ) {
-  this.PLAYING = false;
-  window.setInterval(function() {
-    //Set some time so the canvas finishes painting
-    drawContext.clearRect(0, 0, drawContext.canvas.width, drawContext.canvas.height);
-  }, time? time : 100 );
-  canvas.width = 0;
-}
+        // Draw the time domain chart.
+        for (var i = 0; i < FFT_SIZE; i++) {
+            var value = this.times[i];
+            var percent = value / 256;
+            var height = HEIGHT * percent;
+            var offset = HEIGHT - height - 1;
+            drawContext.fillRect(i * barWidth, offset, 1, 4);
+        } 
 
-Visualizer.prototype.getFrequencyValue = function(freq) {
-  var nyquist =  this.context.sampleRate/2;
-  var index = Math.round(freq/nyquist * this.freqs.length);
-  return this.freqs[index];
+        if (this.PLAYING) {
+            requestAnimFrame(this.draw.bind(this));
+        }
+    }
+
+    Visualizer.prototype.animate = function() {
+        this.PLAYING = true;
+        window.requestAnimFrame(this.draw.bind(this));
+    }
+
+    Visualizer.prototype.clear = function( time ) {
+        this.PLAYING = false;
+        window.setInterval(function() {
+            //Set some time so the canvas finishes painting
+            drawContext.clearRect(0, 0, drawContext.canvas.width, drawContext.canvas.height);
+        }, time? time : 100 );
+        canvas.width = 0;
+    }
+
+    Visualizer.prototype.getFrequencyValue = function(freq) {
+        var nyquist =  this.context.sampleRate/2;
+        var index = Math.round(freq/nyquist * this.freqs.length);
+        return this.freqs[index];
+    }
 }

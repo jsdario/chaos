@@ -8,10 +8,14 @@
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
 
-var PLAYING;
+var PLAYING, MOBILE;
 var context;
 var oscillator;
 var compressor, delay, volume, feedback, context, filter, visualizer;
+
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    MOBILE = true;
+}
 
 /* para el boton */
 /* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
@@ -31,6 +35,7 @@ for (n = 0; n < 500; n++) {
 function Chaos() {
     'use strict';
     try {
+
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         context = new window.AudioContext();
 
@@ -51,7 +56,10 @@ function Chaos() {
         feedback.connect(delay);
         compressor.connect(filter);
         filter.connect(volume);
-        volume.connect(visualizer.analyser);
+        if (!MOBILE) {
+            volume.connect(visualizer.analyser);
+            visualizer.animate();
+        }
         volume.connect(context.destination);
 
     } catch (exception) {
@@ -83,7 +91,7 @@ Chaos.prototype.setFilterFrequency = function (event) {
     octave_number = Math.log(max / min) / Math.LN2;
     // Compute a parameter from 0 to 1 based on an exponential scale.
     alpha = Math.pow(2, octave_number * (((2 / this.div.clientHeight) * (this.div.clientHeight - y)) - 1.0));
-    if (filter.type == 'highpass' || filter.type == 'bandpass') {
+    if (filter.type === 'highpass' || filter.type === 'bandpass') {
         filter.frequency.value = min / alpha;
     } else {
         filter.frequency.value = max * alpha;
@@ -107,11 +115,10 @@ Chaos.prototype.calculateGain = function (event) {
 };
 
 var chaos = new Chaos();
-visualizer.animate();
 
 chaos.div.onmousedown = function (event) {
     'use strict';
-    try {
+    if (!PLAYING) {
         /* Connect to the system */
         oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode();
         oscillator.connect(compressor);
@@ -123,8 +130,6 @@ chaos.div.onmousedown = function (event) {
         oscillator.type = waveforms[current_waveform];
         PLAYING = true;
         return oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
-    } catch (exception) {
-        alert(exception);
     }
 };
 
@@ -173,3 +178,22 @@ taptap_btn.onmousedown = function () {
         return (taptap_btn.innerHTML = elapsed + "ms");
     }
 };
+
+Chaos.prototype.resize = function () {
+    /* Style it up! */
+    var width, height;
+    width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+    height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+    /* Limit to screen dimensions */
+    chaos.div.offsetWidth = (chaos.div.offsetWidth > width) ?  width : chaos.div.offsetWidth;
+    chaos.div.offsetHeight = (chaos.div.offsetHeight > height) ?  height : chaos.div.offsetHeight;
+
+    if (chaos.div.offsetWidth < chaos.div.offsetHeight) {
+        chaos.div.style.maxHeight = chaos.div.offsetWidth + 'px';
+    } else {
+        chaos.div.style.maxWidth = chaos.div.offsetHeight + 'px';
+    }
+};
+
+window.onload = chaos.resize;
+window.onresize = chaos.resize;
