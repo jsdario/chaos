@@ -1,4 +1,5 @@
-/*jslint devel: true, newcap: true, plusplus: true */
+/* jslint devel: true, newcap: true, plusplus: true, browser: true */
+/* global window, global navigator, global screen, global Visualizer */
 /*
 * Chaos pad by Jesus Rivera
 * Universidad de Sevilla
@@ -8,17 +9,21 @@
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
 
-var PLAYING, MOBILE;
+var x,y, PX;
+PX = "px ";
+var PLAYING, MOBILE, COLORWHEEL;
 var context;
 var oscillator;
 var compressor, delay, volume, feedback, context, filter, visualizer;
-
+COLORWHEEL = false;
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     MOBILE = true;
 }
 
 /* para el boton */
 /* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
+var current_color = 1;
+var colors = ["#3366FF", "#990CE8", "#FF0000","#E8760C","#FFDA0D", "#00FF48"];
 var current_waveform = 0;
 var waveforms = ["sine", "square", "sawtooth", "triangle"];
 var current_filter = 0;
@@ -68,6 +73,7 @@ function Chaos() {
 }
 
 Chaos.prototype.div = document.getElementById("chaos-pad");
+Chaos.prototype.bg = document.getElementById("chaos-bg");
 
 Chaos.prototype.calculateFrequency = function (event) {
     'use strict';
@@ -129,6 +135,10 @@ chaos.div.onmousedown = function (event) {
         chaos.calculateGain(event);
         oscillator.type = waveforms[current_waveform];
         PLAYING = true;
+        /* Style background */
+        x = event.pageX - chaos.div.offsetLeft - 2 * chaos.div.offsetWidth;
+        y = event.pageY - chaos.div.offsetTop - 2 * chaos.div.offsetHeight;
+        chaos.div.style.backgroundPosition = x + PX + y + PX;    
         return oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
     }
 };
@@ -136,6 +146,10 @@ chaos.div.onmousedown = function (event) {
 chaos.div.onmousemove = function (event) {
     'use strict';
     if (PLAYING) {
+        /* Style background */
+        x = event.pageX - chaos.div.offsetLeft - 2 * chaos.div.offsetWidth;
+        y = event.pageY - chaos.div.offsetTop - 2 * chaos.div.offsetHeight;
+        chaos.div.style.backgroundPosition = x + PX + y + PX;
         chaos.calculateFrequency(event);
         chaos.setFilterFrequency(event);
         chaos.calculateGain(event);
@@ -192,6 +206,15 @@ Chaos.prototype.resize = function () {
         chaos.div.style.maxHeight = chaos.div.offsetWidth + 'px';
     } else {
         chaos.div.style.maxWidth = chaos.div.offsetHeight + 'px';
+    }
+    if( !COLORWHEEL ) {
+        COLORWHEEL = true;
+        /* First transition is fired, next are intervaled */
+        chaos.bg.style.backgroundColor = colors[1];
+       window.setInterval(function(){
+           current_color = (current_color < 5) ? (current_color + 1) : 0;
+           chaos.bg.style.backgroundColor = colors[current_color];
+       }, 10000);
     }
 };
 

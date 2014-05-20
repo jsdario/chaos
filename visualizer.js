@@ -26,6 +26,10 @@ window.requestAnimFrame = (function () {
     };
 })();
 
+// Interesting parameters to tweak!
+var SMOOTHING = 0.8;
+var FFT_SIZE = 2048;
+
 /* Get canvas */
 var canvas = document.querySelector('canvas');
 
@@ -33,9 +37,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     document.getElementById('chaos-pad').removeChild(canvas);
 } else {
 
-    // Interesting parameters to tweak!
-    var SMOOTHING = 0.8;
-    var FFT_SIZE = 2048;
     var WIDTH = canvas.offsetWidth;
     var BARWIDTH = WIDTH / FFT_SIZE;
     var HEIGHT = canvas.offsetHeight;
@@ -54,9 +55,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
         this.PLAYING = false;
         this.startTime = 0;
         this.startOffset = 0;
-        
-        this.analyser.smoothingTimeConstant = SMOOTHING;
-        this.analyser.fftSize = FFT_SIZE;
     }
 
     Visualizer.prototype.draw = function () {
@@ -64,7 +62,8 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
         drawContext.fillStyle = "white";
-
+        this.analyser.smoothingTimeConstant = SMOOTHING;
+        this.analyser.fftSize = FFT_SIZE;
         // Get the time data from the currently playing music
         this.analyser.getByteTimeDomainData(this.times);
         width = Math.floor(1/this.freqs.length, 10);
