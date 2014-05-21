@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <link rel="stylesheet" type="text/css" href="chaos.css">
-    </head>
-    <body>
-        <div class="row-center">
-            <article>
-                <div id="chaos-bg">
-                    <div id="chaos-pad">
-                        <canvas></canvas>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="chaos.css">
+</head>
+<body>
+    <div class="row-center">
+        <article>
+            <div id="chaos-bg">
+                <div id="chaos-pad">
+                    <canvas></canvas>
+                </div>
+            </div>
+            <div id="wrapper" class="row-center">
+                <div class="btn">
+                    <div class="param clickable" id="filter">LowPass</div>
+                    <div class="lbl">Filter</div>
+                </div>
+                <div class="btn">
+                    <div class="param clickable" id="waveform">Sine</div>
+                    <div class="lbl">Waveform</div>
+                </div>
+                <div class="btn ">
+                    <div class="param clickable" id="tap-tap">OFF</div>
+                    <div id="donoff"></div>
+                    <div class="clickable">
+                        <div id="dlabel" title="Click to turn delay off" class="lbl">Delay</div>
                     </div>
                 </div>
-                <div id="wrapper" class="row-center">
-                    <div class="btn">
-                        <button id="filter">LowPass</button>
-                        <div class="lbl">Filter</div>
-                    </div>
-                    <div class="btn">
-                        <button id="waveform">Sine</button>
-                        <div class="lbl">Waveform</div>
-                    </div>
-                    <div class="btn">
-                        <button id="tap-tap">0 ms</button>
-                        <div class="lbl">Delay</div>
-                    </div>
-                </div>
-            </article>
-        </div> 
-    </body>
-    <script type="text/javascript" src="TouchMapper.js"></script>
-    <script type="text/javascript" src="Visualizer.js"></script>
-    <script type="text/javascript" src="Chaos.js"></script>
+            </div>
+        </article>
+    </div> 
+</body>
+<script type="text/javascript" src="TouchMapper.js"></script>
+<script type="text/javascript" src="Visualizer.js"></script>
+<script type="text/javascript" src="Chaos.js"></script>
 </html>

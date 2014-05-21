@@ -15,7 +15,7 @@ var PLAYING, MOBILE, COLORWHEEL;
 var context;
 var oscillator;
 var compressor, delay, volume, feedback, context, filter, visualizer;
-COLORWHEEL = false; MOBILE = true;
+COLORWHEEL = false;
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     MOBILE = true;
 }
@@ -180,6 +180,8 @@ filter_btn.onclick = function () {
 
 var start = 0;
 var taptap_btn = document.getElementById('tap-tap');
+var delay_onoff = document.getElementById('donoff');
+var delay_label = document.getElementById('dlabel');
 taptap_btn.onmousedown = function () {
     'use strict';
     if (start === 0) {
@@ -189,8 +191,15 @@ taptap_btn.onmousedown = function () {
         delay.delayTime.value = elapsed * 0.001;
         // start again
         start = 0;
+        delay_onoff.style.backgroundColor = "#FFFF00";
         return (taptap_btn.innerHTML = elapsed + "ms");
     }
+};
+
+delay_label.onclick = function () {
+    delay.delayTime.value = 0;
+    delay_onoff.style.backgroundColor = "#55ACEE";
+    return (taptap_btn.innerHTML = "OFF");
 };
 
 Chaos.prototype.resize = function () {

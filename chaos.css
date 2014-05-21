@@ -1,11 +1,18 @@
 /* 
 *    For gradients 
 *    http://css-tricks.com/css3-gradients/
+*   https://kuler.adobe.com/
 */
 
 @font-face {
     font-family: Lobster;
     src: url(res/fonts/Lobster.ttf);
+}
+
+a {
+    font-style: inherit;
+    text-decoration: inherit;
+    color: inherit;
 }
 
 * {
@@ -75,31 +82,32 @@ canvas {
 .btn {
     margin: 20px;
     text-align: center;
-    border-radius: 3px;
-    border: 3px solid #799BFE;
+    display: block;
 }
 
-button {
-    width: 100%;
-    border: none;
-    display: block;
+.param {
+    border-radius: 3px 3px 0 0;
     font-family: Arial;
-    background-color: #777777AA;
     padding: 6px 12px 6px 12px;
 }
 
-button:active {
-    border: none;
-    box-shadow: 0 0 2px 0px rgba(0,0,0,.6) inset;
-} 
-
-button:focus {
-    border: none;
-} 
+.param:hover {
+    background-color: #43FFB7;
+}
 
 .lbl {
-    display: block;
     font-family: Lobster;
-    background-color: #777777AA;
+    border-radius: 0 0 3px 3px;
+    background-color: #D2D2D3;
     padding: 6px 12px 6px 12px;
+}
+
+#donoff {
+    width: 100%;
+    height: 5px;
+    background-color: #55ACEE;
+}
+
+.clickable {
+    cursor: pointer;
 }
