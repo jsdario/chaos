@@ -3,6 +3,11 @@
 *    http://css-tricks.com/css3-gradients/
 */
 
+@font-face {
+    font-family: Lobster;
+    src: url(res/fonts/Lobster.ttf);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -18,10 +23,7 @@
 body, html {
     width: 100%;
     height: 100%;
-}
-
-article {
-    max-width: 100%;
+    background-color: #EEEEEE;
 }
 
 #chaos-pad {
@@ -34,7 +36,7 @@ article {
     background-attachment: scroll;
     box-shadow: 0 0 10px rgba(0,0,0,.7) inset;
     /* Para que que este siempre el cuadrado inbounds */
-    background-size: 400% 400%;
+    background-size: 200% 200%;
     background-repeat: no-repeat;
     background-repeat: no-repeat;
     /* GRADIENT BACKGROUND */
@@ -68,4 +70,36 @@ canvas {
     display: flex;
     justify-content: center;
     flex-direction: column;
+}
+
+.btn {
+    margin: 20px;
+    text-align: center;
+    border-radius: 3px;
+    border: 3px solid #799BFE;
+}
+
+button {
+    width: 100%;
+    border: none;
+    display: block;
+    font-family: Arial;
+    background-color: #777777AA;
+    padding: 6px 12px 6px 12px;
+}
+
+button:active {
+    border: none;
+    box-shadow: 0 0 2px 0px rgba(0,0,0,.6) inset;
+} 
+
+button:focus {
+    border: none;
+} 
+
+.lbl {
+    display: block;
+    font-family: Lobster;
+    background-color: #777777AA;
+    padding: 6px 12px 6px 12px;
 }
