@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="UTF-8">
-	<link rel="stylesheet" type="text/css" href="chaos.css">
-</head>
-<body>
-	<div id="chaos-pad">
-		<div class="mask"></div>
-		<canvas></canvas>
-	</div>
-	<button id="filter">LowPass</button>
-	<button id="waveform">Sine</button>
-	<button id="tap-tap">Delay</button>
-	<br/>
-</body>
-<!-- script @ end = document.ready() -->
-<script type="text/javascript" src="log.js"></script>
-<script type="text/javascript" src="visualizer.js"></script>
-<script type="text/javascript" src="chaos.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <link rel="stylesheet" type="text/css" href="chaos.css">
+    </head>
+    <body>
+        <div class="row-center">
+            <article>
+                <div id="chaos-bg">
+                    <div id="chaos-pad">
+                        <canvas></canvas>
+                    </div>
+                </div>
+                <div id="buttons" class="row-center">
+                    <button id="filter">LowPass</button>
+                    <button id="waveform">Sine</button>
+                    <button id="tap-tap">Delay</button>
+                </div>
+            </article>
+        </div> 
+    </body>
+    <script type="text/javascript" src="TouchMapper.js"></script>
+    <script type="text/javascript" src="Visualizer.js"></script>
+    <script type="text/javascript" src="chaos.js"></script>
 </html>

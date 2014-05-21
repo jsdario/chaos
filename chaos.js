@@ -1,4 +1,5 @@
-/*jslint devel: true, newcap: true, plusplus: true */
+/* jslint devel: true, newcap: true, plusplus: true, browser: true */
+/* global window, global navigator, global screen, global Visualizer */
 /*
 * Chaos pad by Jesus Rivera
 * Universidad de Sevilla
@@ -8,13 +9,21 @@
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
 
-var PLAYING;
+var x,y, PX;
+PX = "px ";
+var PLAYING, MOBILE, COLORWHEEL;
 var context;
 var oscillator;
 var compressor, delay, volume, feedback, context, filter, visualizer;
+COLORWHEEL = false;
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    MOBILE = true;
+}
 
 /* para el boton */
 /* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
+var current_color = 1;
+var colors = ["#3366FF", "#990CE8", "#FF0000","#E8760C","#FFDA0D", "#00FF48"];
 var current_waveform = 0;
 var waveforms = ["sine", "square", "sawtooth", "triangle"];
 var current_filter = 0;
@@ -31,6 +40,7 @@ for (n = 0; n < 500; n++) {
 function Chaos() {
     'use strict';
     try {
+
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         context = new window.AudioContext();
 
@@ -51,7 +61,10 @@ function Chaos() {
         feedback.connect(delay);
         compressor.connect(filter);
         filter.connect(volume);
-        volume.connect(visualizer.analyser);
+        if (!MOBILE) {
+            volume.connect(visualizer.analyser);
+            visualizer.animate();
+        }
         volume.connect(context.destination);
 
     } catch (exception) {
@@ -60,6 +73,7 @@ function Chaos() {
 }
 
 Chaos.prototype.div = document.getElementById("chaos-pad");
+Chaos.prototype.bg = document.getElementById("chaos-bg");
 
 Chaos.prototype.calculateFrequency = function (event) {
     'use strict';
@@ -107,11 +121,10 @@ Chaos.prototype.calculateGain = function (event) {
 };
 
 var chaos = new Chaos();
-visualizer.animate();
 
 chaos.div.onmousedown = function (event) {
     'use strict';
-    try {
+    if (!PLAYING) {
         /* Connect to the system */
         oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode();
         oscillator.connect(compressor);
@@ -122,15 +135,21 @@ chaos.div.onmousedown = function (event) {
         chaos.calculateGain(event);
         oscillator.type = waveforms[current_waveform];
         PLAYING = true;
+        /* Style background */
+        x = event.pageX - chaos.div.offsetLeft - 2 * chaos.div.offsetWidth;
+        y = event.pageY - chaos.div.offsetTop - 2 * chaos.div.offsetHeight;
+        chaos.div.style.backgroundPosition = x + PX + y + PX;    
         return oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
-    } catch (exception) {
-        alert(exception);
     }
 };
 
 chaos.div.onmousemove = function (event) {
     'use strict';
     if (PLAYING) {
+        /* Style background */
+        x = event.pageX - chaos.div.offsetLeft - 2 * chaos.div.offsetWidth;
+        y = event.pageY - chaos.div.offsetTop - 2 * chaos.div.offsetHeight;
+        chaos.div.style.backgroundPosition = x + PX + y + PX;
         chaos.calculateFrequency(event);
         chaos.setFilterFrequency(event);
         chaos.calculateGain(event);
@@ -173,3 +192,31 @@ taptap_btn.onmousedown = function () {
         return (taptap_btn.innerHTML = elapsed + "ms");
     }
 };
+
+Chaos.prototype.resize = function () {
+    /* Style it up! */
+    var width, height;
+    width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+    height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+    /* Limit to screen dimensions */
+    chaos.div.offsetWidth = (chaos.div.offsetWidth > width) ?  width : chaos.div.offsetWidth;
+    chaos.div.offsetHeight = (chaos.div.offsetHeight > height) ?  height : chaos.div.offsetHeight;
+
+    if (chaos.div.offsetWidth < chaos.div.offsetHeight) {
+        chaos.div.style.maxHeight = chaos.div.offsetWidth + 'px';
+    } else {
+        chaos.div.style.maxWidth = chaos.div.offsetHeight + 'px';
+    }
+    if( !COLORWHEEL ) {
+        COLORWHEEL = true;
+        /* First transition is fired, next are intervaled */
+        chaos.bg.style.backgroundColor = colors[1];
+       window.setInterval(function(){
+           current_color = (current_color < 5) ? (current_color + 1) : 0;
+           chaos.bg.style.backgroundColor = colors[current_color];
+       }, 10000);
+    }
+};
+
+window.onload = chaos.resize;
+window.onresize = chaos.resize;
