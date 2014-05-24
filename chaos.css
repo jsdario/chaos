@@ -33,6 +33,11 @@ body, html {
     background-color: #EEEEEE;
 }
 
+article {
+    width: 640px; 
+    max-width: 100%;
+}
+
 #chaos-pad {
 
     opacity: .8;
@@ -88,11 +93,21 @@ canvas {
 .param {
     border-radius: 3px 3px 0 0;
     font-family: Arial;
+    font-size: 1.6em;
+    letter-spacing: -1px;
+    font-weight: bolder;
+    color: #999999;
+    font-variant: small-caps;
     padding: 6px 12px 6px 12px;
+    background-color: #43FFB788;
 }
 
 .param:hover {
-    background-color: #43FFB7;
+    opacity: 1;
+}
+
+.param span {
+    color: #AAAAAA;
 }
 
 .lbl {
@@ -100,12 +115,6 @@ canvas {
     border-radius: 0 0 3px 3px;
     background-color: #D2D2D3;
     padding: 6px 12px 6px 12px;
-}
-
-#donoff {
-    width: 100%;
-    height: 5px;
-    background-color: #55ACEE;
 }
 
 .clickable {
