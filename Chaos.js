@@ -27,7 +27,7 @@ var colors = ["#3366FF", "#990CE8", "#FF0000","#E8760C","#FFDA0D", "#00FF48"];
 var current_waveform = 0;
 var waveforms = ["sine", "square", "sawtooth", "triangle"];
 var current_filter = 0;
-var filters = ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"];
+var filters = [ "lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"];
 
 /* Buffer de la funcion de transferencias del feedback */
 /* Super efficcient */
@@ -41,10 +41,6 @@ function Chaos() {
     'use strict';
     try {
 
-        /* Div building */
-        this.div = document.getElementById("chaos-pad");
-        this.bg = document.getElementById("chaos-bg");
-
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         context = new window.AudioContext();
 
@@ -57,6 +53,9 @@ function Chaos() {
         compressor = context.createDynamicsCompressor();
         volume.gain.value = 1;
 
+        visualizer = new Visualizer(context);
+        filter.type = current_filter;
+
         /* Routing nodes only  ONCE but oscillator each time*/
         delay.connect(compressor);
         delay.connect(feedback);
@@ -64,7 +63,6 @@ function Chaos() {
         compressor.connect(filter);
         filter.connect(volume);
         if (!MOBILE) {
-            visualizer = new Visualizer(context);
             volume.connect(visualizer.analyser);
             visualizer.animate();
         }
@@ -75,30 +73,54 @@ function Chaos() {
     }
 }
 
+Chaos.prototype.div = document.getElementById("chaos-pad");
+Chaos.prototype.bg = document.getElementById("chaos-bg");
+
 Chaos.prototype.calculateFrequency = function (event) {
     'use strict';
     var y, f;
-    // 1. frecuencia + baja (55hz) es el fondo del pad
+    // 1. frecuencia + baja (22) es el fondo del pad
     // Ajuste de coordenadas
     y = this.div.offsetTop + this.div.offsetHeight -  event.pageY;
     // 2. frequencia relativa al centro del pad,
     // factores provisionales
-    f = 55 + 1.5 * y;
+    f = 22 + y * 1.5;
+    /* Calculo de siguiente NOTA musical */
+    var n = Math.round(12 * Math.log(f / 440) + 49);
+    f = Math.pow(2, (n-49) / 12 ) * 440;
     oscillator.frequency.value = f;
 };
+
+Chaos.prototype.shiftFrequency = function (event) {
+    'use strict';
+    var y, f;
+    // 1. frecuencia + baja (44) es el fondo del pad
+    // Ajuste de coordenadas
+    y = this.div.offsetTop + this.div.offsetHeight -  event.pageY;
+    // 2. frequencia relativa al centro del pad,
+    // factores provisionales
+    f = 22 + y * 1.5;
+    /* Calculo de siguiente NOTA musical */
+    var n = Math.round(12 * Math.log(f / 440) + 49);
+    f = 2 * f - Math.pow(2, (n-49) / 12 ) * 440;
+    oscillator.frequency.value = f;
+};
+
 
 Chaos.prototype.setFilterFrequency = function (event) {
     'use strict';
     var y, min, max, octave_number, alpha;
     y = event.pageY - this.div.offsetTop;
-    min = 27.5; // min 40Hz
+    min = 22; // min 40Hz
     max = context.sampleRate / 2; // max half of the sampling rate
     // Logarithm (base 2) to compute how many octaves fall in the range.
     octave_number = Math.log(max / min) / Math.LN2;
     // Compute a parameter from 0 to 1 based on an exponential scale.
-    alpha = Math.pow(2, octave_number * (((2 / this.div.clientHeight) * (this.div.clientHeight - y)) - 1.0));
+    alpha = Math.pow(2, octave_number * (((2 / this.div.offsetHeight) * (this.div.offsetHeight - y)) - 1.0));
     if (filter.type === 'highpass' || filter.type === 'bandpass') {
         filter.frequency.value = min / alpha;
+    } else if (filter.type === 'lowpass') {
+        filter.frequency.value = min / alpha + 440;
     } else {
         filter.frequency.value = max * alpha;
     }
@@ -111,9 +133,9 @@ Chaos.prototype.calculateGain = function (event) {
     // Min = 0; max ~= 0.9
     // sigue una exponencial cuadratica creciente
     // con un umbral de disparo y un factor atenuante
-    // http://www.wolframalpha.com/input/?i=%28x%2F640%29*e^%28+%28x%2F640%29^2+-+1+%29+
+    // http://www.wolframalpha.com/input/?i=%28x%2F500%29*e^%28+%28x%2F500%29^2+-+1+%29+
     if (x < 50) {
-        feedback.gain.value = 0;
+        feedback.gain.value = -0.2;
     } else if (x < this.div.offsetWidth) {
         feedback.gain.value = FEEDBACK_BUFFER[x];
     }
@@ -127,17 +149,17 @@ chaos.div.onmousedown = function (event) {
     if (!PLAYING) {
         /* Connect to the system */
         oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode();
+        oscillator.type = waveforms[current_waveform];
         oscillator.connect(compressor);
         oscillator.connect(delay);
         /* Calculate parameters */
         chaos.calculateFrequency(event);
         chaos.setFilterFrequency(event);
         chaos.calculateGain(event);
-        oscillator.type = waveforms[current_waveform];
         PLAYING = true;
         /* Style background */
-        x = event.pageX - this.offsetLeft - this.offsetWidth;
-        y = event.pageY - this.offsetTop - this.offsetHeight;
+        x = event.pageX - chaos.div.offsetLeft - chaos.div.offsetWidth;
+        y = event.pageY - chaos.div.offsetTop - chaos.div.offsetHeight;
         chaos.div.style.backgroundPosition = x + PX + y + PX;    
         return oscillator.noteOn ? oscillator.noteOn(0) : oscillator.start(0);
     }
@@ -147,10 +169,10 @@ chaos.div.onmousemove = function (event) {
     'use strict';
     if (PLAYING) {
         /* Style background */
-        x = event.pageX - this.offsetLeft - this.offsetWidth;
-        y = event.pageY - this.offsetTop - this.offsetHeight;
+        x = event.pageX - chaos.div.offsetLeft - chaos.div.offsetWidth;
+        y = event.pageY - chaos.div.offsetTop - chaos.div.offsetHeight;
         chaos.div.style.backgroundPosition = x + PX + y + PX;
-        chaos.calculateFrequency(event);
+        chaos.shiftFrequency(event);
         chaos.setFilterFrequency(event);
         chaos.calculateGain(event);
     }
@@ -163,47 +185,9 @@ document.onmouseup = function () {
     return oscillator.noteOff ? oscillator.noteOff(0) : oscillator.stop(0);
 };
 
-var waveform_btn = document.getElementById('waveform');
-waveform_btn.onclick = function () {
-    'use strict';
-    current_waveform = (current_waveform < 3) ? (current_waveform + 1) : 0;
-    return (waveform_btn.innerHTML = waveforms[current_waveform]);
-};
-
-var filter_btn = document.getElementById('filter');
-filter_btn.onclick = function () {
-    'use strict';
-    current_filter = (current_filter < filters.length) ? (current_filter + 1) : 0;
-    filter.type = current_filter;
-    return (filter_btn.innerHTML = filters[current_filter]);
-};
-
-var start = 0;
-var taptap_btn = document.getElementById('tap-tap');
-var delay_onoff = document.getElementById('donoff');
-var delay_label = document.getElementById('dlabel');
-taptap_btn.onmousedown = function () {
-    'use strict';
-    if (start === 0) {
-        start = new Date().getTime();
-    } else {
-        var elapsed = new Date().getTime() - start;
-        delay.delayTime.value = elapsed * 0.001;
-        // start again
-        start = 0;
-        delay_onoff.style.backgroundColor = "#FFFF00";
-        return (taptap_btn.innerHTML = elapsed + "ms");
-    }
-};
-
-delay_label.onclick = function () {
-    delay.delayTime.value = 0;
-    delay_onoff.style.backgroundColor = "#55ACEE";
-    return (taptap_btn.innerHTML = "OFF");
-};
-
 Chaos.prototype.resize = function () {
     /* Style it up! */
+    'use strict';
     var width, height;
     width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
     height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
@@ -229,3 +213,70 @@ Chaos.prototype.resize = function () {
 
 window.onload = chaos.resize;
 window.onresize = chaos.resize;
+
+/* Optimization */
+window.onblur = function () {
+    'use strict';
+    visualizer.clear();
+};
+
+window.onfocus = function () {
+    'use strict';
+    visualizer.animate();
+};
+
+
+/* Botones de la interfaz */
+var waveform_btn = document.getElementById('waveform');
+waveform_btn.onclick = function () {
+    'use strict';
+    current_waveform = (current_waveform < 3) ? (current_waveform + 1) : 0;
+    return (waveform_btn.innerHTML = waveforms[current_waveform]);
+};
+
+var filter_btn = document.getElementById('filter');
+filter_btn.onclick = function () {
+    'use strict';
+    current_filter = (current_filter < filters.length) ? (current_filter + 1) : 0;
+    filter.type = current_filter;
+    return (filter_btn.innerHTML = filters[current_filter]);
+};
+
+var start = 0;
+var taptap_btn = document.getElementById('tap-tap');
+taptap_btn.onmousedown = function () {
+    'use strict';
+    if (start === 0) {
+        taptap_btn.innerHTML = "hit again";
+        start = new Date().getTime();
+    } else {
+        var elapsed = new Date().getTime() - start;
+        delay.delayTime.value = elapsed * 0.001;
+        // start again
+        start = 0;
+        return (taptap_btn.innerHTML = elapsed + "ms");
+    }
+};
+
+var delay_off = document.getElementById('dlabel');
+delay_off.onclick = function () {
+    'use strict';
+    delay.delayTime.value = 0;
+    return (taptap_btn.innerHTML = "off");
+};
+
+var volume_val  = document.getElementById('volume');
+var plus_volume = document.getElementById('plus-volume');
+var less_volume = document.getElementById('less-volume');
+plus_volume.onclick = function () {
+    if (volume.gain.value < 1) {
+        volume.gain.value += 0.01;
+    }
+    return (volume_val.innerHTML = Math.floor(100 * volume.gain.value) + '%');
+};
+less_volume.onclick = function () {
+    if (volume.gain.value > 0) {
+        volume.gain.value -= 0.01;
+    }
+    return (volume_val.innerHTML = Math.floor(100 * volume.gain.value) + '%');
+};
