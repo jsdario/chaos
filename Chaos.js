@@ -9,7 +9,7 @@
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
 
-var x,y, PX;
+var x, y, PX;
 PX = "px ";
 var PLAYING, MOBILE, COLORWHEEL;
 var context;
@@ -23,7 +23,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 /* para el boton */
 /* isSafari ? [0,1,2,3] : ["sine", "square", "sawtooth", "triangle"]; */
 var current_color = 1;
-var colors = ["#3366FF", "#990CE8", "#FF0000","#E8760C","#FFDA0D", "#00FF48"];
+var colors = ["#3366FF", "#990CE8", "#FF0000", "#E8760C", "#FFDA0D", "#00FF48"];
 var current_waveform = 0;
 var waveforms = ["sine", "square", "sawtooth", "triangle"];
 var current_filter = 0;
@@ -102,7 +102,7 @@ Chaos.prototype.shiftFrequency = function (event) {
     f = 22 + y * 1.5;
     /* Calculo de siguiente NOTA musical */
     var n = Math.round(12 * Math.log(f / 440) + 49);
-    f = 2 * f - Math.pow(2, (n-49) / 12 ) * 440;
+    f = 2*f - Math.pow(2, (n-49) / 12 ) * 440;
     oscillator.frequency.value = f;
 };
 
@@ -135,7 +135,7 @@ Chaos.prototype.calculateGain = function (event) {
     // con un umbral de disparo y un factor atenuante
     // http://www.wolframalpha.com/input/?i=%28x%2F500%29*e^%28+%28x%2F500%29^2+-+1+%29+
     if (x < 50) {
-        feedback.gain.value = -0.2;
+        feedback.gain.value = 0;
     } else if (x < this.div.offsetWidth) {
         feedback.gain.value = FEEDBACK_BUFFER[x];
     }
@@ -189,6 +189,16 @@ Chaos.prototype.resize = function () {
     /* Style it up! */
     'use strict';
     var width, height;
+    if( !COLORWHEEL ) {
+        COLORWHEEL = true;
+        /* First transition is fired, next are intervaled */
+        chaos.bg.style.backgroundColor = colors[1];
+        window.setInterval(function(){
+            current_color = (current_color < 5) ? (current_color + 1) : 0;
+            chaos.bg.style.backgroundColor = colors[current_color];
+        }, 10000);
+    }
+
     width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
     height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
     /* Limit to screen dimensions */
@@ -199,15 +209,6 @@ Chaos.prototype.resize = function () {
         chaos.div.style.maxHeight = chaos.div.offsetWidth + 'px';
     } else {
         chaos.div.style.maxWidth = chaos.div.offsetHeight + 'px';
-    }
-    if( !COLORWHEEL ) {
-        COLORWHEEL = true;
-        /* First transition is fired, next are intervaled */
-        chaos.bg.style.backgroundColor = colors[1];
-        window.setInterval(function(){
-            current_color = (current_color < 5) ? (current_color + 1) : 0;
-            chaos.bg.style.backgroundColor = colors[current_color];
-        }, 10000);
     }
 };
 
@@ -237,8 +238,8 @@ waveform_btn.onclick = function () {
 var filter_btn = document.getElementById('filter');
 filter_btn.onclick = function () {
     'use strict';
-    current_filter = (current_filter < filters.length) ? (current_filter + 1) : 0;
-    filter.type = current_filter;
+    current_filter = (current_filter < (filters.length - 1)) ? (current_filter + 1) : 0;
+    filter.type = filters[current_filter];
     return (filter_btn.innerHTML = filters[current_filter]);
 };
 

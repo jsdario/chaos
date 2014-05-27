@@ -36,20 +36,20 @@ body, html {
 article {
     width: 640px; 
     max-width: 100%;
+    min-height: 100%;
 }
 
 #chaos-pad {
 
+    margin-top: 10px;
     opacity: .8;
     width: 640px; 
     height: 640px;
     max-width: 100%;
     max-height: 100%;
     background-attachment: scroll;
-    box-shadow: 0 0 10px rgba(0,0,0,.7) inset;
     /* Para que que este siempre el cuadrado inbounds */
     background-size: 200% 200%;
-    background-repeat: no-repeat;
     background-repeat: no-repeat;
     /* GRADIENT BACKGROUND */
     background-image: -moz-radial-gradient(300px, rgba(255, 255, 255, .9), rgba(255, 255, 255, 0));
@@ -85,7 +85,7 @@ canvas {
 }
 
 .btn {
-    margin: 20px;
+    margin: 10px;
     text-align: center;
     display: block;
 }
@@ -93,17 +93,16 @@ canvas {
 .param {
     border-radius: 3px 3px 0 0;
     font-family: Arial;
-    font-size: 1.6em;
+    font-size: 1.3em;
     letter-spacing: -1px;
     font-weight: bolder;
     color: #999999;
     font-variant: small-caps;
     padding: 6px 12px 6px 12px;
-    background-color: #43FFB788;
 }
 
 .param:hover {
-    opacity: 1;
+    background-color: #43FFB7;
 }
 
 .param span {
@@ -119,4 +118,25 @@ canvas {
 
 .clickable {
     cursor: pointer;
+}
+
+credit {
+    color: black;
+    font-family: Arial;
+    padding: 5px;
+    border-radius: 3px 3px 0 0;
+    font-family: Arial;
+    letter-spacing: -1px;
+    font-weight: bolder;
+    color: #999999;
+    padding: 6px 12px 6px 12px;
+}
+
+credit a:hover {
+    color: #AAAAAA;
+}
+
+hr {
+    border: none;
+    background-color: #D2D2D3;
 }
