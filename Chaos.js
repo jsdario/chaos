@@ -252,19 +252,3 @@ delay_off.onclick = function () {
     delay.delayTime.value = 0;
     return (taptap_btn.innerHTML = "off");
 };
-
-var volume_val  = document.getElementById('volume');
-var plus_volume = document.getElementById('plus-volume');
-var less_volume = document.getElementById('less-volume');
-plus_volume.onclick = function () {
-    if (volume.gain.value < 1) {
-        volume.gain.value += 0.01;
-    }
-    return (volume_val.innerHTML = Math.floor(100 * volume.gain.value) + '%');
-};
-less_volume.onclick = function () {
-    if (volume.gain.value > 0) {
-        volume.gain.value -= 0.01;
-    }
-    return (volume_val.innerHTML = Math.floor(100 * volume.gain.value) + '%');
-};
