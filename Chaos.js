@@ -153,35 +153,6 @@ document.onmouseup = function () {
     return oscillator.noteOff ? oscillator.noteOff(0) : oscillator.stop(0);
 };
 
-Chaos.prototype.resize = function () {
-    /* Style it up! */
-    var width, height;
-    if( !COLORWHEEL ) {
-        COLORWHEEL = true;
-        /* First transition is fired, next are intervaled */
-        chaos.bg.style.backgroundColor = colors[1];
-        window.setInterval(function(){
-            current_color = (current_color < 5) ? (current_color + 1) : 0;
-            chaos.bg.style.backgroundColor = colors[current_color];
-        }, 10000);
-    }
-
-    width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-    height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
-    /* Limit to screen dimensions */
-    chaos.div.offsetWidth = (chaos.div.offsetWidth > width) ?  width : chaos.div.offsetWidth;
-    chaos.div.offsetHeight = (chaos.div.offsetHeight > height) ?  height : chaos.div.offsetHeight;
-
-    if (chaos.div.offsetWidth < chaos.div.offsetHeight) {
-        chaos.div.style.maxHeight = chaos.div.offsetWidth + 'px';
-    } else {
-        chaos.div.style.maxWidth = chaos.div.offsetHeight + 'px';
-    }
-};
-
-window.onload = chaos.resize;
-window.onresize = chaos.resize;
-
 /* Optimization */
 window.onblur = function () {
     visualizer.clear();
