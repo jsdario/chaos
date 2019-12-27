@@ -98,6 +98,7 @@ Chaos.prototype.shiftFrequency = function (event) {
     var n = Math.round(12 * Math.log(f / 440) + 49);
     f = 2*f - Math.pow(2, (n-49) / 12 ) * 440;
     oscillator.frequency.value = f;
+    console.log(getClosestNoteToFrequencyWithQualifier(f))
 };
 
 Chaos.prototype.calculateGain = function (event) {
@@ -190,3 +191,25 @@ delay_off.onclick = function () {
     delay.delayTime.value = 0;
     return (taptap_btn.innerHTML = "off");
 };
+
+/**
+ * Freq = note x 2 N/12,
+ * 
+ * Returns a string with a qualifier like, "the next note is close and above"
+ * ^E
+ */
+const notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+const A = 55; // "note": Lowest A possible 
+const K = Math.pow(2, 1/12);
+
+function getClosestNoteToFrequencyWithQualifier(f) {
+    const distance = Math.pow(f / A, 1 / K); // Number of steps from f to A
+    const steps = distance % 12;
+    const roundSteps = Math.round(distance) % 12;
+    const closestNote = notes[roundSteps];
+    let qualifier = steps - roundSteps > 0 ? '^' : '˅'
+    if (steps - roundSteps == 0) {
+        qualifier = ''
+    }
+    return qualifier + closestNote // String!
+}
