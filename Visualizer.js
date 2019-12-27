@@ -87,7 +87,9 @@ Visualizer.prototype.animate = function() {
 Visualizer.prototype.clear = function( time ) {
     canvas.width = 0;
     this.PLAYING = false;
-    timer.clearTimeout();
+    if (timer !== undefined) {
+        timer.clearTimeout();
+    }
     window.setInterval(function() {
         //Set some time so the canvas finishes painting
         drawContext.clearRect(0, 0, drawContext.canvas.width, drawContext.canvas.height);

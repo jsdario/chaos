@@ -46,6 +46,12 @@
             </article>
         </div> 
     </body>
+    <script>
+        /* Disable zoom in iOS > 10 */
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+    </script>
     <script type="text/javascript" src="TouchMapper.js"></script>
     <script type="text/javascript" src="Visualizer.js"></script>
     <script type="text/javascript" src="Chaos.js"></script>
