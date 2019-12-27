@@ -47,7 +47,10 @@
         </div> 
     </body>
     <script>
-        /* Disable zoom in iOS > 10 */
+        /**
+         * Disable zoom in iOS > 10
+         * 'gesturestart' is a non-standard event
+         */
         document.addEventListener('gesturestart', function (e) {
             e.preventDefault();
         });

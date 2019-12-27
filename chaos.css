@@ -41,7 +41,6 @@ article {
 
 #chaos-pad {
     border-radius: 4pt;
-    margin-top: 10px;
     opacity: .8;
     width: 640px; 
     height: 640px;
@@ -59,6 +58,13 @@ article {
     background-image: radial-gradient(300px, rgba(255, 255, 255, .9), rgba(255, 255, 255, 0));
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(255, 255, 255, 1)',
         endColorstr='rgba(255, 255, 255, 0)', GradientType=1);
+}
+
+/* Do not add margin top in hand held devices */
+@media only screen and (min-device-width:420px) {
+    #chaos-pad {
+        margin-top: 10px;
+    }
 }
 
 #chaos-bg {

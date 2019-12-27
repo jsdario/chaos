@@ -1,3 +1,6 @@
+
+'use strict';
+
 function TouchMapper(element) {
     var div = document.querySelector(element);
     div.addEventListener("touchstart", this.handler, true);
@@ -7,7 +10,6 @@ function TouchMapper(element) {
 }
 
 TouchMapper.prototype.handler = function (event) {
-    'use strict';
     var first, touches, type, simulatedEvent;
     touches = event.changedTouches;
     first = touches[0];
