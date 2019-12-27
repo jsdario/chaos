@@ -16,7 +16,7 @@ PX = "px ";
 var PLAYING, MOBILE, COLORWHEEL;
 var context;
 var oscillator;
-var compressor, delay, volume, feedback, context, filter, visualizer;
+var compressor, delay, volume, feedback, context, visualizer;
 COLORWHEEL = false;
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     MOBILE = true;
@@ -28,8 +28,6 @@ var current_color = 1;
 var colors = ["#3366FF", "#990CE8", "#FF0000", "#E8760C", "#FFDA0D", "#00FF48"];
 var current_waveform = 0;
 var waveforms = ["sine", "square", "sawtooth", "triangle"];
-var current_filter = 0;
-var filters = [ "lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"];
 
 /* Buffer de la funcion de transferencias del feedback */
 /* Super efficcient */
@@ -50,19 +48,16 @@ function Chaos() {
         delay     = context.createDelay ? context.createDelay() : context.createDelayNode();
         volume    = context.createGain  ? context.createGain()  : context.createGainNode();
         feedback  = context.createGain  ? context.createGain()  : context.createGainNode();
-        filter    = context.createBiquadFilter();
         compressor = context.createDynamicsCompressor();
         volume.gain.value = 1;
 
         visualizer = new Visualizer(context);
-        filter.type = current_filter;
 
         /* Routing nodes only  ONCE but oscillator each time*/
         delay.connect(compressor);
         delay.connect(feedback);
         feedback.connect(delay);
-        compressor.connect(filter);
-        filter.connect(volume);
+        compressor.connect(volume);
         if (!MOBILE) {
             volume.connect(visualizer.analyser);
             visualizer.animate();
@@ -105,25 +100,6 @@ Chaos.prototype.shiftFrequency = function (event) {
     oscillator.frequency.value = f;
 };
 
-
-Chaos.prototype.setFilterFrequency = function (event) {
-    var y, min, max, octave_number, alpha;
-    y = event.pageY - this.div.offsetTop;
-    min = 22; // min 40Hz
-    max = context.sampleRate / 2; // max half of the sampling rate
-    // Logarithm (base 2) to compute how many octaves fall in the range.
-    octave_number = Math.log(max / min) / Math.LN2;
-    // Compute a parameter from 0 to 1 based on an exponential scale.
-    alpha = Math.pow(2, octave_number * (((2 / this.div.offsetHeight) * (this.div.offsetHeight - y)) - 1.0));
-    if (filter.type === 'highpass' || filter.type === 'bandpass') {
-        filter.frequency.value = min / alpha;
-    } else if (filter.type === 'lowpass') {
-        filter.frequency.value = min / alpha + 440;
-    } else {
-        filter.frequency.value = max * alpha;
-    }
-};
-
 Chaos.prototype.calculateGain = function (event) {
     var x = event.pageX - this.div.offsetLeft; // coord
     // 2. ganancia relativa al centro del pad
@@ -150,7 +126,6 @@ chaos.div.onmousedown = function (event) {
         oscillator.connect(delay);
         /* Calculate parameters */
         chaos.calculateFrequency(event);
-        chaos.setFilterFrequency(event);
         chaos.calculateGain(event);
         PLAYING = true;
         /* Style background */
@@ -168,7 +143,6 @@ chaos.div.onmousemove = function (event) {
         y = event.pageY - chaos.div.offsetTop - chaos.div.offsetHeight;
         chaos.div.style.backgroundPosition = x + PX + y + PX;
         chaos.shiftFrequency(event);
-        chaos.setFilterFrequency(event);
         chaos.calculateGain(event);
     }
 };
@@ -223,13 +197,6 @@ var waveform_btn = document.getElementById('waveform');
 waveform_btn.onclick = function () {
     current_waveform = (current_waveform < 3) ? (current_waveform + 1) : 0;
     return (waveform_btn.innerHTML = waveforms[current_waveform]);
-};
-
-var filter_btn = document.getElementById('filter');
-filter_btn.onclick = function () {
-    current_filter = (current_filter < (filters.length - 1)) ? (current_filter + 1) : 0;
-    filter.type = filters[current_filter];
-    return (filter_btn.innerHTML = filters[current_filter]);
 };
 
 var start = 0;
