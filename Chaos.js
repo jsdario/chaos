@@ -9,6 +9,8 @@
 * http://chimera.labs.oreilly.com/books/1234000001552/ch05.html#s05_3
 */
 
+'use strict';
+
 var x, y, PX;
 PX = "px ";
 var PLAYING, MOBILE, COLORWHEEL;
@@ -38,7 +40,6 @@ for (n = 0; n < 640; n++) {
 }
 
 function Chaos() {
-    'use strict';
     try {
 
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -77,7 +78,6 @@ Chaos.prototype.div = document.getElementById("chaos-pad");
 Chaos.prototype.bg = document.getElementById("chaos-bg");
 
 Chaos.prototype.calculateFrequency = function (event) {
-    'use strict';
     var y, f;
     // 1. frecuencia + baja (22) es el fondo del pad
     // Ajuste de coordenadas
@@ -92,7 +92,6 @@ Chaos.prototype.calculateFrequency = function (event) {
 };
 
 Chaos.prototype.shiftFrequency = function (event) {
-    'use strict';
     var y, f;
     // 1. frecuencia + baja (44) es el fondo del pad
     // Ajuste de coordenadas
@@ -108,7 +107,6 @@ Chaos.prototype.shiftFrequency = function (event) {
 
 
 Chaos.prototype.setFilterFrequency = function (event) {
-    'use strict';
     var y, min, max, octave_number, alpha;
     y = event.pageY - this.div.offsetTop;
     min = 22; // min 40Hz
@@ -127,7 +125,6 @@ Chaos.prototype.setFilterFrequency = function (event) {
 };
 
 Chaos.prototype.calculateGain = function (event) {
-    'use strict';
     var x = event.pageX - this.div.offsetLeft; // coord
     // 2. ganancia relativa al centro del pad
     // Min = 0; max ~= 0.9
@@ -145,7 +142,6 @@ Chaos.prototype.calculateGain = function (event) {
 var chaos = new Chaos();
 
 chaos.div.onmousedown = function (event) {
-    'use strict';
     if (!PLAYING) {
         /* Connect to the system */
         oscillator = context.createOscillator ? context.createOscillator() : context.createOscillatorNode();
@@ -166,7 +162,6 @@ chaos.div.onmousedown = function (event) {
 };
 
 chaos.div.onmousemove = function (event) {
-    'use strict';
     if (PLAYING) {
         /* Style background */
         x = event.pageX - chaos.div.offsetLeft - chaos.div.offsetWidth;
@@ -180,14 +175,12 @@ chaos.div.onmousemove = function (event) {
 
 /* Que pare (parar sonido) siempre al quitar un click */
 document.onmouseup = function () {
-    'use strict';
     PLAYING = false;
     return oscillator.noteOff ? oscillator.noteOff(0) : oscillator.stop(0);
 };
 
 Chaos.prototype.resize = function () {
     /* Style it up! */
-    'use strict';
     var width, height;
     if( !COLORWHEEL ) {
         COLORWHEEL = true;
@@ -217,12 +210,10 @@ window.onresize = chaos.resize;
 
 /* Optimization */
 window.onblur = function () {
-    'use strict';
     visualizer.clear();
 };
 
 window.onfocus = function () {
-    'use strict';
     visualizer.animate();
 };
 
@@ -230,14 +221,12 @@ window.onfocus = function () {
 /* Botones de la interfaz */
 var waveform_btn = document.getElementById('waveform');
 waveform_btn.onclick = function () {
-    'use strict';
     current_waveform = (current_waveform < 3) ? (current_waveform + 1) : 0;
     return (waveform_btn.innerHTML = waveforms[current_waveform]);
 };
 
 var filter_btn = document.getElementById('filter');
 filter_btn.onclick = function () {
-    'use strict';
     current_filter = (current_filter < (filters.length - 1)) ? (current_filter + 1) : 0;
     filter.type = filters[current_filter];
     return (filter_btn.innerHTML = filters[current_filter]);
@@ -246,7 +235,6 @@ filter_btn.onclick = function () {
 var start = 0;
 var taptap_btn = document.getElementById('tap-tap');
 taptap_btn.onmousedown = function () {
-    'use strict';
     if (start === 0) {
         taptap_btn.innerHTML = "hit again";
         start = new Date().getTime();
@@ -261,7 +249,6 @@ taptap_btn.onmousedown = function () {
 
 var delay_off = document.getElementById('dlabel');
 delay_off.onclick = function () {
-    'use strict';
     delay.delayTime.value = 0;
     return (taptap_btn.innerHTML = "off");
 };
